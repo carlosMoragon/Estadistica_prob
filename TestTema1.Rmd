@@ -1,0 +1,44 @@
+PREGUNTA 1
+
+Tenemos dos urnas: la urna I y la urna II.
+La urna I contiene tres bolas blancas y cuatro negras mientras que la urna II está inicialmente vacía.
+Extraemos dos bolas al azar de la urna I y, sin mirar su color, las ponemos dentro de la urna II.
+A continuación cogemos al azar una bola de la urna I y otra bola al azar de la urna II.
+¿Cuál es la probabilidad de que ambas sean blancas?
+
+```{r}
+n = 50000
+sim = replicate(n, {
+  urnaI = c(rep("B", 3), rep("N", 4))
+  bolas = sample(urnaI, 2) #Variaciones(7, 2)
+  if(bolas == c("B", "N") || bolas == c("N", "B")){
+    urnaI = c(rep("B", 2), rep("N", 3))
+  }else if(bolas == c("N", "N")){
+    urnaI = c(rep("B", 3), rep("N", 2))
+  }else{
+    urnaI = c(rep("B", 1), rep("N", 4))
+  }
+  urnaII = bolas
+  I = sample(urnaI, 1) # 5
+  II = sample(urnaII, 1) # 2
+  all(c(I, II) == c("B", "B"))
+  
+})
+#
+#Fav_cases = function(){
+  #urnaI = c(rep("B", 3), rep("N", 4))
+  #quitamos por lo menos una blanca
+ # urnaI = c(rep("B", 2), rep("N", 4))
+  #bola = sample(urnaI, 1) # 7
+#  urnaII = 
+#}
+
+
+
+sum(sim)/n
+```
+
+
+```{r}
+
+```

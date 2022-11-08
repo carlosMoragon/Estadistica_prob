@@ -1,0 +1,323 @@
+---
+title: '2: probabilidad'
+output: html_document
+date: "2022-09-12"
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Problema
+-----
+
+Se extraen tres cartas de una baraja española.
+¿Cuál es la probabilidad de obtener una pareja (dos cartas del mismo valor)?
+
+```{r}
+variaciones <- function(n, m) exp(lgamma(n + 1L) - lgamma(n - m + 1L))
+
+sim_case <- function() {
+  # ????????
+}
+
+sim_fav_case <- function() {
+  # ????
+}
+```
+
+Solución 1: no me importa el orden
+```{r}
+# V1: No me importa el orden de las cartas
+sim_case <- function() {
+  cards <- paste(c('H', 'C', "B", "O"), rep(1:10, each = 4))
+  sets::as.set(sample(cards, 3))                        # --> nº formas: choose(40, 3)
+}
+
+sim_fav_case <- function() {
+  # 1) Elijo un número para mi pareja
+  pair_number <- sample(1:10, 1)                              #--> nº formas: 10
+  # 2) Elijo 2 palos entre los 4 posibles para combinar con el número
+  suits <- sample(c('H', 'C', "B", "O"), 2)         #--> nº formas: choose(4, 2)
+  my_pair <- paste(suits, pair_number)
+  # 3) Entre las 40 - 4 cartas con un número distinto a mi pareja, elijo una
+  valid_numbers <- setdiff(1:10, pair_number)
+  remaining <- paste(c('H', 'C', "B", "O"), rep(valid_numbers, each = 4))
+  final_card <- as.set(sample(remaining, 1))                 # --> nº formas: 36
+  sets::as.set(c(my_pair, final_card))
+}
+
+```
+
+Solución 2: sí me importa el orden
+```{r}
+# V2: Sí me importa el orden de las cartas
+
+sim_case <- function() {
+  cards <- paste(c('H', 'C', "B", "O"), rep(1:10, each = 4))
+  sample(cards, 3)                           # --> nº formas: variaciones(40, 3)
+}
+
+sim_fav_case <- function() {
+  # 1) Elijo un número para mi pareja
+  pair_number <- sample(1:10, 1)                              #--> nº formas: 10
+  # 2) Entre las 40 - 4 cartas con un número distinto a mi pareja, elijo una
+  valid_numbers <- setdiff(1:10, pair_number)
+  remaining <- paste(c('H', 'C', "B", "O"), rep(valid_numbers, each = 4))
+  final_card <- sample(remaining, 1)                         # --> nº formas: 36
+  # 3) Esta vez, como el orden importa, debo elegir una posición para la carta
+  cards <- rep(NA, 3)
+  index <- sample(1:3, 1)                                    # --> nº formas: 3
+  cards[index] <- final_card
+  # 4) Elijo 2 palos entre los 4 posibles. El orden importa.
+  suits <- sample(c('H', 'C', "B", "O"), 2)    #--> nº formas: variaciones(4, 2)
+  my_pair <- paste(suits, pair_number)
+  cards[setdiff(1:3, index)] <- my_pair
+  cards
+}
+```
+
+Haciendolo con simulaciones:
+
+```{r}
+n = 1000
+simulations = replicate(n, {
+  baraja = rep(1:10, 4)
+  
+  mano = sample(baraja,3) 
+  
+  mano[1] == mano[2] && mano[1:2] != mano[3]
+})
+sum(simulations)/n
+
+#ESTA MAL!!!!!!!!!!!!!!!!!!!
+```
+
+Problema
+-----
+
+En un bar, cinco amigos han pedido tres cafés con leche y dos cañas. ¿De cuántas formas
+pueden repartirse las bebidas?
+
+```{r}
+
+```
+
+Problema
+-----
+
+¿Cuál es la probabilidad de obtener una mano de tres espadas y dos copas de una baraja
+española?
+
+```{r}
+
+```
+
+
+Problema
+-----
+
+¿De cuántas formas distintas pueden sentarse en 6 butacas consecutivas
+tres chicas y tres chicos, de forma que no haya dos chicas ni dos chicos
+consecutivos?
+
+```{r}
+
+```
+
+Problema
+-----
+
+El próximo Enero vas a visitar las ciudades \textit{A, B, C, D}.
+Si cada visita requiere un día ¿De cuántas formas distintas puedes programar
+tus viajes?
+
+```{r}
+
+```
+
+Problema
+-----
+
+Durante el mes de Enero, deseas viajar a las ciudades \textit{A, B, C, D} en este
+orden. ¿Cuántas formas distintas de viajar tienes?
+
+```{r}
+
+```
+
+
+Problema
+-----
+
+¿Cuál es la probabilidad de sacar 25 caras en 50 tiradas de una moneda?
+
+```{r}
+
+```
+
+Problema
+-----
+
+10 parejas de hermanos se han apuntado a fútbol. Si se hace un equipo de 8 
+personas al azar, cuál es la probabilidad de que no haya hermanos en el equipo.
+
+```{r}
+
+```
+
+Problema
+-----
+
+10 tarjetas blancas y 15 tarjetas negras se barajan conjuntamente.
+Calcula la probabilidad de que la primera tarjeta blanca esté en la posición 5.
+
+```{r}
+#casos totales
+tarjetas = c(rep("B", 10), rep("N", 15))
+sample(tarjetas)  #-> factorial(25)/(factorial(15)*factorial(10))
+casosTotales = factorial(25)/(factorial(15)*factorial(10))
+
+#casos favorables
+casosfavorables = factorial(20)/(factorial(11)*factorial(9))
+
+casosfavorables / casosTotales
+```
+
+Problema
+-----
+
+Un alumno tiene 10 libros: 4 de mates, 3 de programación, 2 de historia y uno
+de inglés. ¿De cuántas formas se pueden ordenar los libros si el alumno quiere
+mantenerlos agrupados por temática?
+
+```{r}
+#escogemos primero el grupo de libros que vamos a ordenar -> 4!
+#cada grupo lo ordenamos por separado, siendo permutaciones del numero de libros que hay en cada grupo -> n!
+#suponiendo que cada libro es diferente:
+factorial(4)*factorial(4)*factorial(3)*factorial(2)*factorial(1)
+
+#escribir una funcion sin bucles for que genere casos favorables.
+```
+
+
+Problema
+-----
+
+En una urna hay 3 bolas rojas numeradas del 1 al 3 y 3 bolas negras numeradas
+del 1 al 3. Sacamos dos bolas, ¿Probabilidad de sacar dos treses o una bola
+negra y otra blanca?
+
+```{r}
+```
+
+Problema
+-----
+
+Si hay $n$ personas en una clase, ¿Cuál es la probabilidad de que ningún par de
+personas celebren el cumpleaños el mismo día? ¿Y la de que haya al menos una
+coincidencia? Calcula una tabla de la probabilidad de coincidencia para varios
+valores de $n$ ¿Cuánto tiene que valer $n$ para que la probabilidad sea mayor
+que $1/2$?
+
+```{r}
+all_cases = function(n){
+  sample(1:365, n, replace = TRUE)#-> 365^n
+}
+all_cases(45)
+
+#--------------
+fav_cases = function(n){
+  sample(1:365, n) #variaciones(365, n)
+}
+fav_cases(45)
+
+prob_no_colision = function(n){
+  variaciones(365, n)/365^n
+}
+
+prob_colision = function(n){
+  1 - (variaciones(365, n)/365^n)
+}
+#--------------------
+
+ns = 5:50
+
+ps = prob_colision(ns)
+min(ns[ps >= 0.5])
+
+```
+
+
+Problema
+-----
+
+Se extraen tres cartas de una baraja española.
+¿Cuál es la probabilidad de obtener una pareja (dos cartas del mismo valor)?
+
+```{r}
+sim_case <- function() {
+  cards <- paste(c('H', 'C', "B", "O"), rep(1:10, each = 4))
+  sample(cards, 3)
+}
+
+get_card_number <- function(cards) {
+  purrr::map_chr(strsplit(cards, split = " "), 2)
+}
+
+N <- 5000
+is_success <- replicate(N, {
+  cards <- sim_case()
+  numbers <- get_card_number(cards) 
+  counts <- table(numbers)
+  (length(counts) == 2) && (all(sort(counts) == c(1, 2)))
+})
+
+print(sum(is_success) / N)
+```
+
+Problema
+-----
+
+¿Cuál es la probabilidad de sacar 25 caras en 50 tiradas de una moneda?
+
+```{r}
+# Simulate one trial
+trial = sample(0:1, 50, replace = TRUE)
+# Check if the event has occurred (TRUE) or not (FALSE)
+has_occurred = (sum(trial) == 25)
+
+# A simulation involves repeating the previous setup a looooooot of times
+# We can use a for loop or...
+nb_sims = 50000
+events = replicate(nb_sims, {
+  trial = sample(0:1, 50, replace = TRUE)
+  (sum(trial) == 25)
+})
+# Use Laplace rule: succesful events / total events
+print(sum(events) / nb_sims)
+```
+
+Problema
+-----
+
+En una urna hay 3 bolas rojas numeradas del 1 al 3 y 3 bolas negras numeradas
+del 1 al 3. Sacamos dos bolas, ¿Probabilidad de sacar dos treses o una bola
+negra y otra blanca?
+
+```{r}
+```
+
+
+Problema
+-----
+
+
+Se reparten 5 cartas de una baraja española (40 cartas con 4 palos distintos).
+¿Cuál es la probabilidad de obtener tres espadas y dos copas?
+
+```{r}
+
+```
+

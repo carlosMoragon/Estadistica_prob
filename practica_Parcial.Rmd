@@ -1,0 +1,328 @@
+PRACTICA PARA EL PARCIAL DE ESTADISTICA:
+```{r}
+
+```
+
+
+```{r}
+variaciones <- function(n, m) {
+  exp(lgamma(n + 1L) - lgamma(n - m + 1L))
+}
+```
+
+
+
+De una urna que contiene a bolas blancas y b negras se hacen extracciones sin reemplazamiento. Sea Xi
+el n´umero de extracci´on en que aparece la i-´esima bola blanca. Calcula (a) La distribuci´on conjunta de
+X1 y X2. (b) La distribuci´on de X1 condicionada por X2.
+
+a) P(X1 = j, X2 = k) ?
+
+```{r}
+#Caso concreto:
+a = 4
+b = 5
+#P(X3 = 6)
+
+#Nos importa el orden y permitimos repetición.
+
+#Casos totales -> Problema Misisipi
+
+#Rellenar parte del vector con las restricciones
+
+#poner 5 bolas en fila con repetición es misisipi
+
+#poner 3 bolas en fila con repeticion es misisipi
+
+fav_cases = choose(5, 2) * 3 #favorables
+total_cases = choose(9, 4)
+
+
+#caso general
+
+#casos totales = misisipi -> (a+b)!/a!*b! -> choose(a+b,a)
+
+#casos favorables = elijo la combinacion de bolas despues de k -> choose(a+b-k, a-2)
+
+f = function(a, b){
+  if(k > j){
+    choose(a+b-k, a-2)/choose(a+b,a)
+  }
+}
+
+
+
+
+```
+
+
+
+19. [Spiegel 2.14] La funci´on de densidad conjunta de X e Y es
+f(x, y) = (xy
+96 0 < x < 4, 1 < y < 5
+0 en otro caso
+Calcula P(X + Y < 3)
+```{r}
+
+integrate2_dydx(function(x,y) x*y/96,
+                from_x = 0, to_x = 2,
+                from_y = function(x) 1, to_y = function(x) 3-x)$value
+
+```
+
+20. Una persona tiene dos pr´otesis de pierna. Sea X la variable aleatoria: “duraci´on de la pr´otesis izquierda
+(en a˜nos)” e Y la variable aleatoria: “duraci´on de la pr´otesis derecha (en a˜nos)”. La distribuci´on conjunta
+de ambas variables es
+f(x, y) = (
+ce−2x
+e
+−3y x ≥ 0, y ≥ 0
+0 en otro caso
+(a) Calcula c.
+(b) Calcula la funci´on de distribuci´on marginal de X. -> F(x)
+(c) Calcula P r(1 < X < 3).
+(d) Calcula la probabilidad de que la pr´otesis izquierda dure al menos 3 a˜nos m´as que la pr´otesis
+derecha.
+
+```{r}
+#CAlCULAR c:
+c= 1/integrate2_dydx((function(x,y) exp(-2*x) * exp(-3*y)),
+            from_x = 0, to_x = Inf,
+            from_y = function(x) 0, to_y = function(x) Inf)$value
+
+#CALCULAR LA FUNCION DE DISTRIBUCION MARGINAL DE X -> F(X)
+f_x = function(x){
+  6 * exp(-2*x) * integrate(function(y) exp(-3*y), 0, Inf)$value
+}
+
+#P(1 < X < 3):
+
+integrate(f_x, 1, 3)$value
+integrate(function(x) 2*exp(-2*x), 1, 3)$value
+
+#P(X > 3 + Y) -> recta: x = 3+y -> y = x -3
+
+p_3annosmas = integrate2_dydx((function(x,y) 6 * exp(-2*x) * exp(-3*y)),
+                from_x = 3, to_x = Inf,
+                from_y = function(x) 0, to_y = function(x) x - 3)$value
+
+```
+
+
+1. La combinaci´on de una caja fuerte consiste en 5 cifras distintas ¿Cu´antas combinaciones tendr´as que
+probar como m´aximo para abrirla? ¿Y si cada cifra s´olo tuviese que ser distinta de la anterior? ¿Y si
+pudieses repetir cualquier cifra?
+
+Datos:
+  - 5 fichas distintas
+  - combinaciones?
+```{r}
+#a) Problema del ordenar numeros del 0-9 en 5 posiciones -> problema del podio
+variaciones(10, 5)
+
+#b) distinta a la anterior: similar al problema de tirar un dado a partir de la segunda tirada.
+10* 9^4
+
+#c) sucesos independientes con 10 posibilidades en cada caso:
+10^5
+
+```
+
+17. n tarjetas numeradas de 1 a n se barajan y se sit´uan alineadas sobre la mesa. Se produce coincidencia
+en el lugar i, si la tarjeta que ocupa tal lugar, lleva el n´umero i. ¿Cu´al es la probabilidad de que se
+produzca una coincidencia en el lugar i? (b) ¿Cu´al es la probabilidad de que se produzcan coincidencias
+en los lugares i y j? (c) ¿Cu´al es la probabilidad de que se produzca alguna coincidencia? (d) ¿Cu´al es
+la probabilidad de que se produzca alguna coincidencia si n = 10? Calc´ulalo usando la f´ormula de (c) y
+usando simulaciones.
+
+```{r}
+
+casos_totales = function(n){
+  baraja = 1:n
+  orden = sample(baraja) #n!
+}
+
+casos_favorables = function(n,i){
+  baraja = c(1:i-1, i+1:n)
+  orden = sample(baraja, i-1) #variaciones(n-1, i-1) * factorial(n-i)
+  orden2 = sample(baraja[-orden], n-i)
+  c(orden, i, orden2)
+}
+
+total = (variaciones(n-1, i-1) * factorial(n-i))/factorial(n)
+
+#suponemos que j > i
+casos_favorablesb = function(n, i, j){
+  baraja = c(1:i-1, i+1:j-1, j+1:n)
+  orden = sample(baraja, i-1) #variaciones(n-2, i-1) * variaciones(n-2-i-1, j-i) *factorial(n-j)
+  orden2 = sample(baraja[-orden], j-i)
+  orden3 = sample(baraja[-c(orden2, orden)], n-j)
+  c(orden, i, orden2)
+}
+total = (variaciones(n-2, i-1) * variaciones(n-1-i, j-i) *factorial(n-j))/factorial(n)
+```
+
+
+20. [Ross, 3.29] Pides a tu amigo que riegue tu planta mientras est´as de vacaciones. Sin agua, la planta
+morir´a con probabilidad 0.8, mientras que con agua las probabilidades se reducen al 0.15. Estas seguro
+al 90% de que tu amigo se acordar´a de regar la planta.
+(a) ¿Cu´al es la probabilidad de que la planta viva cuando vuelvas?
+(b) Si la planta est´a muerta, ¿cu´al es la probabilidad de que tu amigo se haya olvidado de regar la
+planta?
+
+Datos:
+sin agua -> p_morir = 0.8
+con agua -> p_morir = 0.15
+p_riegue = 0.9
+```{r}
+p_viva = 0.9*0.85 + 0.1*0.2
+
+#p(no regar|muerta) = p(noregar, muerta)/p(muerta)
+p_muerta = 1 - p_viva
+p_noregar_muerta = 0.8*0.1
+
+p_noregar = p_noregar_muerta/p_muerta
+```
+
+TEMA 3 ejercicios VAS:
+
+
+1. [Spiegel 2.2, 2.4]
+(a) Encuentra la funci´on de probabilidad de ni˜nos y ni˜nas en familas con 3 hijos, suponiendo igual
+probabilidad para ni˜nos y ni˜nas.
+(b) Encuentra la funci´on de distribuci´on para la variable aleatoria del apartado a).
+(c) Dibuja la funci´on de distribuci´on.
+(d) Imag´ınate que el ´unico dato del que partes es la funci´on de distribuci´on. ¿C´omo podr´ıas hallar la
+funci´on de probabilidad?
+
+
+```{r}
+
+#funcion de probabilidad
+
+#X = "numero de niños en una familia de 3 descendientes"
+
+casos_totales = function(){
+  sample(c("o", "a"), 3, replace = TRUE) #sucesos independientes 2^3
+}
+
+p_0x = 1/8 
+p_1x = 3/8 #variaciones(1, 3)
+p_2x = 3/8 #variaciones(2,3)
+p_3x = 1/8
+
+f = function(x){
+  variaciones(x,3)/8
+}
+
+
+```
+
+
+
+2. 3 bater´ıas se eligen al azar entre un grupo de 3 nuevas, 4 usadas pero que funcionan, y 5 bater´ıas defectuosas. Sea X “el n´umero de bater´ıas nuevas”; sea Y “el n´umero de bater´ıas usadas pero funcionando”.
+¿Cu´al es la distribuci´on conjunta de X e Y ? ¿Y las marginales? Calc´ulalas mediante razonamiento
+directo y marginalizando p(x, y) en la tabla.
+
+```{r}
+
+casos_totales = function(){
+  sample(12, 3) #NO me importa el orden, y todas son distintas -> choose(12, 3)
+}
+
+casos_fav_x = function(x){
+  x = 2 # choose(3, x)
+  sample(9, 1) #choose(9, 3-x)
+}
+
+casos_fav_y = function(y){
+  y = 3 #choose(4, x)
+  
+  sample(8, 3-y) #choose(8, 3-y)
+  
+}
+
+p_x = function(x) (choose(3,x)*choose(9, 3-x))/choose(12,3)
+p_y = function(y) (choose(4,y)*choose(8, 3-y))/choose(12,3)
+
+f_x_y = function(x, y) ifelse(x >= 0 & x < 4 & y >= 0 & y < 4 & x + y <= 3,
+                              p_x(x) * p_y(y),
+                              0)
+
+tabla = outer(0:3, 0:3, f_x_y)
+f_y = colSums(tabla)
+f_x = rowSums(tabla)
+```
+
+
+4. Se lanzan dos monedas con probabilidades de cara p1 y p2. a) Estudiar el n´umero de lanzamientos N que
+se realizan hasta que aparece cara en ambas monedas simult´aneamente. b) ¿Cu´al es n´umero esperando
+de lanzamientos si p1 = 0.5 = p2.
+
+```{r}
+
+
+```
+
+5. La funci´on de probabilidad conjunta de dos variables aleatorias X e Y est´a dada por
+f(x, y) = (
+cxy x = 1, 2, 3 e y = 1, 2, 3
+0 en otro caso
+Calcula (a) la constante c, (b) P(X = 2, Y = 3), (c) P(X ≤ 2, Y ≤ 2), (d) P(X ≥ 2), (e) P(Y ≤ 2), (f)
+P(X = 1), (g) P(Y = 3)
+
+```{r}
+
+f_xy = function(x,y){
+  ifelse((x > 0 & x < 4) & (y > 0 & y < 4),
+         0.0625*y*x,
+         0)
+}
+
+#a)
+c = 1/integrate2_dydx(function(x,y) y*x,
+                from_x = 1, to_x = 3,
+                from_y = function(x) 1, to_y = function(x) 3)$value
+
+#b)
+#P(X = 2, Y = 3)
+p_2_3 = f_xy(2,3)
+
+#c)
+#P(X ≤ 2, Y ≤ 2)
+integrate2_dydx(f_xy,
+                from_x = 0, to_x = 2,
+                from_y = function(x) 0, to_y = function(x)2)$value
+
+#d)
+#P(X >= 2) = 1 - P(X < 2) = 1 - F(2)
+
+f_x = function(x) integrate(f_xy, 1, x, x = x)$value
+1 - f_x(2)
+
+
+#e)
+#P(Y ≤ 2) = F(2)
+f = function(y) integrate(f_xy, 1, y,  y = y)$value
+f(2)
+
+#f)
+#P(X = 1)
+
+f = function(x){
+  integrate(f_xy, 1, 3, x = x)$value
+}
+f(1)
+
+```
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,220 @@
+PRÁCTICA DE EJERCICIOS DE CLASE:
+
+```{r}
+variaciones <- function(n, m) exp(lgamma(n + 1L) - lgamma(n - m + 1L))
+
+```
+
+```{r}
+
+```
+
+1. La combinaci´on de una caja fuerte consiste en 5 cifras distintas ¿Cu´antas combinaciones tendr´as que
+probar como m´aximo para abrirla? ¿Y si cada cifra s´olo tuviese que ser distinta de la anterior? ¿Y si
+pudieses repetir cualquier cifra?
+
+```{r}
+#Primera pregunta:
+numeros = 1:10
+cifras = sample(numeros, 5) #-> variaciones(9,5)
+uno_uno = variaciones(10,5)
+
+#Segunda pregunta:
+numeros = 1:10
+#Elegimos el primer numero
+primero = sample(numeros, 1) # -> 9
+#elegimos el seguundo numero
+sample(numeros[-primero], 1) # -> 8
+#asi consecutivamente -> 10*(9^4)
+
+uno_dos = 10*(9^4)
+
+#Tercera pregunta:
+numeros = 1:10
+cifras = sample(numeros, 5, replace = TRUE) #-> 10^5
+
+uno_tres = 10^5
+
+```
+
+2. Dos bolas se sacan al azar de una urna que contiene 6 bolas blancas y 5 negras. ¿Cu´al es la probabilidad
+de que una de las bolas sea blanca y la otra negra?
+
+```{r}
+total_cases = function(){
+  urna = c(rep("B", 6), rep("N", 5))
+  sample(urna, 2) #choose(11, 2)
+}
+
+fav_cases = function(){
+  urna = c(rep("B", 6), rep("N", 5))
+  #coger una blanca choose(6, 1)
+  #coger una negra choose(5, 1)
+}
+dos = (choose(6,1)*choose(5,1))/choose(11,2)
+
+#Simulacion:
+n = 1000
+simulation = replicate(n, {
+  urna = c(rep("B", 6), rep("N", 5))
+  sets::as.set(sample(urna, 2)) == sets::as.set(c("B", "N"))
+})
+dos_sim = sum(simulation)/n
+```
+
+3. ¿Cu´antas palabras distintas de 8 letras pueden formarse con a,a,a,b,b,c,c,d?
+
+```{r}
+#hay elementos repetidos
+#MISISIPI
+
+tres = factorial(8)/(factorial(3)*factorial(2)*factorial(2))
+
+```
+
+4. Un comit´e de tama˜no 5 se selecciona al azar entre un grupo de 6 hombres y 9 mujeres. ¿Cu´al es la
+probabilidad de que el comit´e consista en 3 hombres y 2 mujeres?
+
+```{r}
+total_cases = function(){
+  personas = c(paste(1:6, "H"), paste(1:9, "M"))
+  sample(personas, 5) #choose(15, 5)
+}
+
+fav_cases = function(){
+  #seleccionamos 3 chichos -> choose(6, 3)
+  sample(1:6, 3)
+  #seleccionamos 2 chicas -> choose(9,2)
+  sample(1:9, 2)
+}
+
+cuatro = (choose(6, 3)*choose(9,2))/choose(15,5)
+
+#SIMULACION:
+n = 1000000
+simulation = replicate(n, {
+  personas = c(paste(1:6, "H"), paste(1:9, "M"))
+  sets::as.set(sapply(strsplit(sample(personas, 5), " "), function(vec) vec[2])) == sets::as.set(c(rep("H", 3), rep("M", 2)))
+})
+
+cuatro_sim = sum(simulation)/n
+
+```
+
+
+
+```{r}
+personas = c(paste(1:6, "H"), paste(1:9, "M"))
+sets::as.set(sapply(strsplit(sample(personas, 5), " "), function(vec) vec[2])) == sets::as.set(c(rep("H", 3), rep("M", 2)))
+
+
+
+personas = c(rep("H", 6), rep("M", 9))
+trial = sample(personas, 5)
+
+#sum(trial == "M") == 3
+counts = table(trial)
+
+length(trial) == 2  && counts["M"] == 3
+
+```
+
+Clase de ejercicios:
+
+```{r}
+
+```
+
+
+Tres cartas: P(pareja)
+
+```{r}
+total_cases = function(){
+  baraja = paste(c("O", "C", "E", "B"), rep(1:10, each = 4))
+  trial = sample(baraja, 3) # -> choose(40,3)
+  trial
+}
+
+fav_cases = function(){
+  baraja = paste(c("O", "C", "E", "B"), rep(1:10, each = 4))
+  number_par = sample(1:10, 1) #elegir un numero entre 10 -> 10
+  palos = sample(c("O", "C", "E", "B"),2) #Elegit 2 entre 4 -> choose(4, 2)
+  number_ind = sample((1:10)[-number_par], 1) #elegir el numbero individual -> 9
+  palo = sample(c("O", "C", "E", "B"), 1) # elegir un palo para la individual -> 4
+  trial = sets::as.set(c(paste(number_par, palos), paste(number_ind, palo)))
+  trial
+}
+
+prob = (10*choose(4,2)*9*4)/choose(40,3)
+prob
+
+```
+
+(Cuadernillo, por mi cuenta)
+5. En una clase de estad´ıstica hay 6 alumnos de ADE y 4 inform´aticos. Los alumnos reciben un ranking
+dependiendo de su nota en un examen. Asumiendo que no hay notas repetidas, ¿Cu´antos rankings
+posibles hay? ¿Cu´al es la probabilidad de que los 4 inform´aticos obtengan los 4 primeros puestos del
+ranking?
+
+```{r}
+clase = c(paste(1:6, "ADE"), paste(1:4, "info"))
+#no hay notas repes.
+total_cases = function(){
+  sample(clase) #ordenar todos los alumnos 10!
+}
+pos1 = factorial(10)
+
+fav_cases = function(){
+  cuatro_puestos = sample(paste(1:4, "info")) #ordenamos los informaticos en las cuatro primeros puestos. 4!
+  demas = sample(paste(1:6, "ADE")) #ordenamos el resto. -> 6!
+  c(cuatro_puestos, demas)
+}
+prob = (factorial(6)*factorial(4))/pos1
+prob
+```
+
+16. a tarjetas blancas y b tarjetas negras se barajan conjuntamente.
+(a) Calcular la probabilidad de que la primera tarjeta blanca est´e en la posici´on k.
+(b) En general, calcular la probabilidad de que la i-´esima tarjeta blanca ocupe la posici´on k.
+
+```{r}
+#a -> blancas
+#b -> negras
+
+#a)
+total_cases = function(a, b){
+  tarjetas = c(rep("b", a), rep("n", b)) #(a+b)!
+  sample(tarjetas)
+}
+
+fav_cases = function(a, b, k){
+  #ordenamos primero las negras -> variaciones(b, k-1)
+  #ponemos la blanca en el elemento k -> a
+  #reordenamos todos los elementos que nos quedan -> ((b-(k-1)+(a-1))!
+}
+
+solucion = variaciones(b, k)*factorial(((b-k)+(a-1)))/factorial(a+b)
+
+
+#b)
+
+fav_cases2 = function(a, b, k, i){
+  #tenemos i-1 elementos antes de la k -> las colocamos variaciones(a, i-1) * (a-1)
+  #rellenamos con b -> variaciones(b, k-i+1)
+  #ponemos la blanca que nos queda a--
+  #ordenamos los que nos quedan -> 
+  
+}
+
+```
+
+
+
+
+
+
+
+
+
+
+
